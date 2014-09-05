@@ -35,6 +35,7 @@ int sensorValue = 0;        // value read from the pot
 int outputValue = 0;        // value output to the PWM (analog out)
 float voltageScaled = 0.0;
 float voltageAbsolute = 0.0;
+float voltageDecimal = 0.0;
 
 
 
@@ -47,17 +48,21 @@ void loop() {
   // read the analog in value:
   sensorValue = analogRead(analogInPin);            
   // map it to the range of the analog out:
+  Serial.print(sensorValue);
   outputValue = map(sensorValue, 0, 1023, 0, 255);  
+  Serial.print(outputValue);
   // change the analog out value:
   analogWrite(analogOutPin, outputValue); 
   
 
   // map the output voltage to -5 to 5
   voltageScaled = map(outputValue, 0, 255, -5, 5);  
+  Serial.print(voltageScaled);
 
 
   // print + or - and return the absolute value
-  voltageAbsolute = printPostiveNegative(voltageScaled);
+  voltageAbsolute = printPositiveNegative(voltageScaled);
+  Serial.print(voltageAbsolute);
   
   // print binary representation of integer portion of
   //    voltage value (i.e. the part before the decimal point)
@@ -68,18 +73,6 @@ void loop() {
   // print binary representation of the portion of the voltage
   //    value after the decimal point
   decimalToBinary(voltageDecimal);
-
-
-
-
-
-/*
-
-
-convert decimal to binary, print 
-
-*/
-
 
 
   // wait 2 milliseconds before the next loop
