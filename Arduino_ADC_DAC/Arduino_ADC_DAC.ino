@@ -8,28 +8,17 @@
  and also maps to a range from -5 to 5 V and displays the result
  on the LCD shield in binary.
  
- 
- The circuit:
- * 
- 
  created 5 Sept. 2014
  by Karmyn McKnight & Megan Lu
- 
- 
- */
+*/
  
 #include <Wire.h>
 #include <Adafruit_MCP23017.h>
 #include <Adafruit_RGBLCDShield.h>
-
 Adafruit_RGBLCDShield lcd = Adafruit_RGBLCDShield();
- 
 #define WHITE 0x7 
  
- 
-
-// These constants won't change.  They're used to give names
-// to the pins used:
+// CONSTANTS 
 int inpin = A0;  // Analog input pin (from power supply or func gen)
 int outpin = 3; // Analog output pin (to o-scope or multimeter)
 float analogin = 3; // analog input (0-1023)
@@ -40,96 +29,57 @@ unsigned long time;
 unsigned long oldTime;
 unsigned long delayLCD;
 
-
-/*
-int sensorValue = 0;        // value read from the pot
-int outputValue = 0;        // value output to the PWM (analog out)
-float voltageScaled = 0.0;
-float voltageAbsolute = 0.0;
-float voltageDecimal = 0.0;
-*/
-
-
+// INITIAL SETUP
 void setup() {
-  pinMode(inpin, INPUT);
-  pinMode(outpin, OUTPUT);
   
-  time = millis();
-  oldTime = millis();
+  pinMode(inpin, INPUT);  // set input pin to input pinmode
+  pinMode(outpin, OUTPUT);  // sest output pin to output pinmode
   
-  lcd.begin(16,2);
-  lcd.setBacklight(WHITE);
-  // initialize serial communications at 9600 bps:
-  Serial.begin(9600); 
+  time = millis();   // record current time
+  oldTime = millis();  // record current time
+  
+  lcd.begin(16,2);     // initialize LCD
+  lcd.setBacklight(WHITE);   // set backlight to white
+ 
+  Serial.begin(9600); // initialize serial communication at 9600 bps
+
 }
 
+
+// REPEATING LOOP
 void loop() {
   
-  time = millis();
-  Serial.println(oldTime);
-  Serial.println(time);
+  time = millis();  // record current time 
   
   // read the analog in value:
-  analogin = analogRead(inpin);            
-  // map it to the range of the analog out:
-  Serial.println(analogin);
-  actual_voltage = (analogin*10)/1023-5; // calculate actual input value
+  analogin = analogRead(inpin);  // input of 0 to 1023    
+  
+  // Serial.println(analogin);
+  
+  // map analog input to the range of the analog out:
+  actual_voltage = (analogin*10)/1023-5; // range of 0 to 255
   
   // Separate into integer and decimal components
-  int_input = abs(actual_voltage);
-  dec_input = abs(actual_voltage) - int_input;
+  int_input = abs(actual_voltage); // floor of value
+  dec_input = abs(actual_voltage) - int_input;  // decimal value (<1)
   
   
   // display binary number on LCD once a second
   if ((time-oldTime)>=1000) {
+    // update LCD only when 1000 milliseconds have elapsed 
+    // since the last time we updated LCD
     Serial.println("print");
-    print_LCD();
-    oldTime=time;
+    print_LCD(); // update LCD
+    oldTime=time; // update oldTime to reflect new time
   }
   
   // scale input for output
-  float scaled_output = ((analogin + 1)/4) - 1;
+  float scaled_output = ((analogin + 1)/4) - 1; // range of 0 to 5
   
   // output 0-5 V corresponding to input
   analogWrite(outpin, scaled_output);
   delay(1);
-  
-  /*
-  outputValue = map(sensorValue, 0, 1023, 0, 255);  
-  Serial.print(outputValue);
-  // change the analog out value:
-  analogWrite(analogOutPin, outputValue); 
-  */
-
-/*
-  // map the output voltage to -5 to 5
-  voltageScaled = map(outputValue, 0, 255, -5, 5);  
-  Serial.print(voltageScaled);
-*/
-
-/*
-
-  // print + or - and return the absolute value
-  voltageAbsolute = printPositiveNegative(voltageScaled);
-  Serial.print(voltageAbsolute);
-  
-  */
-  
-  // print binary representation of integer portion of
-  //    voltage value (i.e. the part before the decimal point)
-  // return the remaining part after the decimal point
-//  voltageDecimal = printVoltageBeforeDecimal(voltageAbsolute);
-  
-  
-  // print binary representation of the portion of the voltage
-  //    value after the decimal point
-//  decimalToBinary(voltageDecimal);
-
-
-  // wait 2 milliseconds before the next loop
-  // for the analog-to-digital converter to settle
-  // after the last reading:
-//  delay(2);                     
+                 
 }
 
 
@@ -171,11 +121,11 @@ void print_LCD(){
   }
   
   // Print decimal
-  int n = 12;  // 12 digits for decimal
+  int n = 12;  // allow space for 12 digits for decimal
   
   while(n>0) {
     // use trick for multiplication by 2 for decimals
-    deci_input = dec_input*2;
+    dec_input = dec_input*2;
     
     if (dec_input < 1) {
       lcd.print("0");
@@ -190,73 +140,4 @@ void print_LCD(){
   }
     
 }
-
-
-
-
-/*
-float printPositiveNegative(float voltageInput) {
-  lcd.setCursor(0,0);
-  if (voltageInput>=0) {
-    lcd.print("+");
-    return voltageInput;
-  }
-  else {
-    lcd.print("-");
-    return abs(voltageInput);
-  }
-}
-
-
-float printVoltageBeforeDecimal(float voltageValue) {
-  lcd.setCursor(1,0);
-  if (voltageValue>=5) {
-    lcd.print("101.");
-    return (voltageValue-5);
-  }
-  else if (voltageValue>=4) {
-    lcd.print("100.");
-    return (voltageValue-4);
-  }
-  else if (voltageValue>=3) {
-    lcd.print("011.");
-    return (voltageValue-3);
-  }
-  else if (voltageValue>=2) {
-    lcd.print("010.");
-    return (voltageValue-2);
-  }
-  else if (voltageValue>=1) {
-    lcd.print("001.");
-    return (voltageValue-1);
-  }
-  else {
-    lcd.print("000.");
-    return voltageValue;
-  }
-  
-}
-
-
-
-void decimalToBinary(float value) {
-
-  int i=0;
-  while (value>0) {
-    lcd.setCursor((5+i),0);
-    value=value*2;
-    if (value>=1) {
-      lcd.print("1");
-      value=value-1;
-    }
-    else {
-      lcd.print("0");
-    }
-    i=i+1;
-  }  
-  
-}
-
-*/
-
 
