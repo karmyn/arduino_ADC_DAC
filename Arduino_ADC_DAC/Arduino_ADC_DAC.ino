@@ -54,34 +54,27 @@ void loop() {
   // read the analog in value:
   analogin = analogRead(inpin);  // input of 0 to 1023    
   
-  // Serial.println(analogin);
-  
   // map analog input to the range of the analog out:
-  actual_voltage = (analogin*10)/1023-5; // range of 0 to 255
+  actual_voltage = (analogin*10)/1023-5; // range of -5 to 5
   
   // Separate into integer and decimal components
   int_input = abs(actual_voltage); // floor of value
   dec_input = abs(actual_voltage) - int_input;  // decimal value (<1)
   
-  
-  // display binary number on LCD once a second
-  if ((time-oldTime)>=1000) {
-    // update LCD only when 1000 milliseconds have elapsed 
-    // since the last time we updated LCD
+  if ((time-oldTime)>=1000) {   // update LCD only once a second
     Serial.println("print");
     print_LCD(); // update LCD
     oldTime=time; // update oldTime to reflect new time
   }
   
   // scale input for output
-  float scaled_output = ((analogin + 1)/4) - 1; // range of 0 to 5
+  float scaled_output = ((analogin + 1)/4) - 1; // range of 0 to 255
   
   // output 0-5 V corresponding to input
   analogWrite(outpin, scaled_output);
   delay(1);
                  
 }
-
 
 
 void print_LCD(){
@@ -99,24 +92,19 @@ void print_LCD(){
   if(int_input == 0){
     lcd.print("000."); 
   }
-
-  if(int_input == 1){
+  else if(int_input == 1){
     lcd.print("001."); 
   }
-
-  if(int_input == 2){
+  else if(int_input == 2){
     lcd.print("010."); 
   }
-
-  if(int_input == 3){
+  else if(int_input == 3){
     lcd.print("011."); 
   }
-
-  if(int_input == 4){
+  else if(int_input == 4){
     lcd.print("100."); 
   }
-
-  if(int_input == 5){
+  else if(int_input == 5){
     lcd.print("101."); 
   }
   
@@ -130,8 +118,7 @@ void print_LCD(){
     if (dec_input < 1) {
       lcd.print("0");
     }
-    
-    if (dec_input >= 1) {
+    else {
       lcd.print("1");
       dec_input = dec_input - 1;
     }
