@@ -36,6 +36,10 @@ float analogin = 3; // analog input (0-1023)
 int int_input = 0; // integer part of input
 float dec_input = 0; // decimal part of input
 float actual_voltage = 0; // actual input voltage
+unsigned long time;
+unsigned long oldTime;
+unsigned long delayLCD;
+
 
 /*
 int sensorValue = 0;        // value read from the pot
@@ -50,6 +54,9 @@ void setup() {
   pinMode(inpin, INPUT);
   pinMode(outpin, OUTPUT);
   
+  time = millis();
+  oldTime = millis();
+  
   lcd.begin(16,2);
   lcd.setBacklight(WHITE);
   // initialize serial communications at 9600 bps:
@@ -57,6 +64,11 @@ void setup() {
 }
 
 void loop() {
+  
+  time = millis();
+  Serial.println(oldTime);
+  Serial.println(time);
+  
   // read the analog in value:
   analogin = analogRead(inpin);            
   // map it to the range of the analog out:
@@ -67,8 +79,13 @@ void loop() {
   int_input = abs(actual_voltage);
   dec_input = abs(actual_voltage) - int_input;
   
-  // display binary number on LCD
-  print_LCD();
+  
+  // display binary number on LCD once a second
+  if ((time-oldTime)>=1000) {
+    Serial.println("print");
+    print_LCD();
+    oldTime=time;
+  }
   
   // scale input for output
   float scaled_output = ((analogin + 1)/4) - 1;
