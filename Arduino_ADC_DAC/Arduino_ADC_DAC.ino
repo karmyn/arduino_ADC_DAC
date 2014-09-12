@@ -54,8 +54,11 @@ void loop() {
   // read the analog in value:
   analogin = analogRead(inpin);  // input of 0 to 1023    
   
+  // scale input for output
+  float scaled_output = ((analogin + 1)/4) - 1; // range of 0 to 255
+  
   // map analog input to the range of the analog out:
-  actual_voltage = (analogin*10)/1023-5; // range of -5 to 5
+  actual_voltage = ((scaled_output*10)/255)-5; // range of -5 to 5
   
   // Separate into integer and decimal components
   int_input = abs(actual_voltage); // floor of value
@@ -67,9 +70,6 @@ void loop() {
     oldTime=time; // update oldTime to reflect new time
   }
   
-  // scale input for output
-  float scaled_output = ((analogin + 1)/4) - 1; // range of 0 to 255
-  
   // output 0-5 V corresponding to input
   analogWrite(outpin, scaled_output);
   delay(1);
@@ -77,6 +77,7 @@ void loop() {
 }
 
 
+// FUNCTION TO PRINT BINARY TO LCD
 void print_LCD(){
   lcd.setCursor(0,0);
   
@@ -88,25 +89,29 @@ void print_LCD(){
     lcd.print("-");
   }
   
+  lcd.setCursor(1,0);
+  
   // Print integer
   if(int_input == 0){
     lcd.print("000."); 
   }
-  else if(int_input == 1){
+  if(int_input == 1){
     lcd.print("001."); 
   }
-  else if(int_input == 2){
+  if(int_input == 2){
     lcd.print("010."); 
   }
-  else if(int_input == 3){
+  if(int_input == 3){
     lcd.print("011."); 
   }
-  else if(int_input == 4){
+  if(int_input == 4){
     lcd.print("100."); 
   }
-  else if(int_input == 5){
+  if(int_input == 5){
     lcd.print("101."); 
   }
+  
+  lcd.setCursor(5,0);
   
   // Print decimal
   int n = 12;  // allow space for 12 digits for decimal
@@ -114,6 +119,7 @@ void print_LCD(){
   while(n>0) {
     // use trick for multiplication by 2 for decimals
     dec_input = dec_input*2;
+    lcd.setCursor((12+5-n),0);
     
     if (dec_input < 1) {
       lcd.print("0");
